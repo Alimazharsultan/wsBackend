@@ -70,7 +70,7 @@ client.on('message', function(topic, msg){
   // emit to sockets.io
   io.emit('cpu',{name: 'cpu', temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
   console.log(sendData);
-  if(sendData===4){
+  if(sendData===4 && tempS!=0 && humidityS!=0){
     
     const event = new EntryModel({
       readingtime: new Date().toISOString(),
@@ -111,7 +111,10 @@ client.on('message', function(topic, msg){
 //   }, 5000);
 io.on("connection", (socket) => {
 //   console.log('MQTT connection established')
-  io.emit('cpu',{name: 'cpu', temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
+  if(tempS!=0 && humidityS!=0){
+    io.emit('cpu',{name: 'cpu', temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
+  }
+  
   socket.on("AC",(m)=>{
     if(client.connected){
         client.publish('AIEMSL1/ACD', m.value.toString(),opts=options);
