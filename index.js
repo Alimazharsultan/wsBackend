@@ -68,9 +68,9 @@ client.on('message', function(topic, msg){
   }
   
   // emit to sockets.io
-  io.emit('cpu',{name: 'cpu', temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
+  io.emit('cpu',{ temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
   console.log(sendData);
-  if(sendData===4 && tempS!=0 && humidityS!=0){
+  if(sendData===4){
     
     const event = new EntryModel({
       readingtime: new Date().toISOString(),
@@ -106,13 +106,20 @@ client.on('message', function(topic, msg){
     //       });   
   }
 })
-// setInterval(()=>{
-  
-//   }, 5000);
+
+setInterval(()=>{
+  if(sendData===0){
+    io.emit('cpu',{value: 'NaN'});
+   
+    console.log('values reset')
+  }
+  sendData=0;
+ 
+  }, 60000);
 io.on("connection", (socket) => {
 //   console.log('MQTT connection established')
   if(tempS!=0 && humidityS!=0){
-    io.emit('cpu',{name: 'cpu', temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
+    io.emit('cpu',{ temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
   }
   
   socket.on("AC",(m)=>{
