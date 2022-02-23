@@ -5,7 +5,7 @@ const EntryModel = require('./models/location3data')
 const mqtt = require("mqtt");
 require('dotenv').config();
 
-let sendData = 0;
+let valueRecieved = false;
 let ACValue = 0;
 
 
@@ -24,37 +24,27 @@ var lumS = '';
 var options={
       port: "1883",
       protocol: "mqtt",
-      clientId: "mqttjs01",
+      clientId: "NodeJSclient",
       hostname: "broker.hivemq.com",
     };
 var client = mqtt.connect(options);
-client.subscribe("AIEMSL1/temperature");
-client.subscribe("AIEMSL1/humidity");
-client.subscribe("AIEMSL1/pressure");
-client.subscribe("AIEMSL1/luminance"); 
+client.subscribe("AIEMSL1/EDL_0001");
 // console.log("connected  "+client.connected);
 io.on("AC", (message)=>{
     console.log('recieved:')
 })
 client.on('message', function(topic, msg){
   console.log(topic+" Message Recieved -> "+msg.toString());
+  if(topic.toString()==="AIEMSL1/EDL_0001"){
+    const obj = JSON.parse(msg.toString());
+    tempS = obj.Tem;
+    humidityS = obj.Hum;
+    pressureS = obj.Pres;
+    lumS = obj.Lu;
+
+    
+  }
   
-  if(topic.toString()==="AIEMSL1/temperature"){
-    tempS = msg.toString();
-    sendData++;
-      }
-  if(topic.toString()==="AIEMSL1/humidity"){
-    humidityS = msg.toString();
-    sendData++;
-  }
-  if(topic.toString()==="AIEMSL1/pressure"){
-    pressureS = msg.toString();
-    sendData++;
-  }
-  if(topic.toString()==="AIEMSL1/luminance"){
-    lumS = msg.toString();
-    sendData++;
-  }
   //Send Data to ac
   if(ACValue!=0){
     if(client.connected){
@@ -69,8 +59,8 @@ client.on('message', function(topic, msg){
   
   // emit to sockets.io
   io.emit('cpu',{ temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
-  console.log(sendData);
-  if(sendData===4){
+  
+  if(valueRecieved){
     
     const event = new EntryModel({
       readingtime: new Date().toISOString(),
@@ -84,7 +74,7 @@ client.on('message', function(topic, msg){
     });
     return event.save().then((r)=>{
       console.log('saved to database');
-      sendData=0;
+      
     }    
     ).catch(err=>{
       console.log('Error saving to database');
@@ -100,7 +90,7 @@ client.on('message', function(topic, msg){
     //           pressure_status: "Coming Soon",
     //         }).then((response) => {
     //           console.log('Data Sent')
-    //           sendData=0;
+    //           valueRecieved=0;
     //       }).catch(err=>{
     //         throw err;
     //       });   
@@ -108,14 +98,17 @@ client.on('message', function(topic, msg){
 })
 
 setInterval(()=>{
-  if(sendData===0){
+  if(!valueRecieved){
     io.emit('cpu',{value: 'NaN'});
    
     console.log('values reset')
   }
-  sendData=0;
+  valueRecieved=false;
  
-  }, 60000);
+  }, 15000);
+
+  
+  
 io.on("connection", (socket) => {
 //   console.log('MQTT connection established')
   if(tempS!=0 && humidityS!=0){
@@ -134,7 +127,6 @@ io.on("connection", (socket) => {
 })
 });
 
-
 mongoose
   .connect(
     `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/merntutorial?retryWrites=true&w=majority`
@@ -144,7 +136,6 @@ mongoose
        server.listen(process.env.PORT|| 4002, () => {
       console.log("Sockets Server Running");
     });
-    
     
   })
   .catch(err => {
