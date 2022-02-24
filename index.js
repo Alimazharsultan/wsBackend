@@ -105,7 +105,7 @@ setInterval(()=>{
   }
   valueRecieved=false;
  
-  }, 30000);
+  }, 5000);
 
   
   
