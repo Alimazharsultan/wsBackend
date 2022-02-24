@@ -42,7 +42,7 @@ client.on('message', function(topic, msg){
     pressureS = obj.Pres;
     lumS = obj.Lu;
 
-    
+    valueRecieved = true;
   }
   
   //Send Data to ac
@@ -105,7 +105,7 @@ setInterval(()=>{
   }
   valueRecieved=false;
  
-  }, 15000);
+  }, 30000);
 
   
   
