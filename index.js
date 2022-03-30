@@ -151,7 +151,7 @@ io.on("connection", (socket) => {
 
 mongoose
   .connect(
-    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/AIEMSLAB?retryWrites=true&w=majority`
+    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/merntutorial?retryWrites=true&w=majority`
   )
   .then(() => {
     console.log('Database Server Running')
