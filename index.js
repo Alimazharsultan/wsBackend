@@ -29,6 +29,7 @@ var options={
     };
 var client = mqtt.connect(options);
 client.subscribe("AIEMSL1/EDL_0001");
+client.subscribe("AIEMSL1/EDL_0002");
 // console.log("connected  "+client.connected);
 io.on("AC", (message)=>{
     console.log('recieved:')
@@ -44,6 +45,27 @@ client.on('message', function(topic, msg){
 
     valueRecieved = true;
   }
+  if(topic.toString()==="AIEMSL1/EDL_0002"){
+    const obj = JSON.parse(msg.toString());
+    io.emit('EDL_0002',{ temp: obj.Tem, humidity: obj.Hum, pressure: obj.Pres, lum: obj.Lu });
+    
+    const event = new EntryModel({
+      readingtime: new Date().toISOString(),
+      temperature: obj.Tem,
+      humidity: obj.Hum,
+      pressure: obj.Pres,
+      altitude: obj.Lu,
+      temperature_status: "Coming Soon",
+      humidity_status: "Coming Soon",
+      pressure_status: "Coming Soon",
+    });
+    return event.save().then((r)=>{
+      console.log('EDL_0002 saved to database');
+    }    
+    ).catch(err=>{
+      console.log('Error saving to database');
+            }); 
+    }
   
   //Send Data to ac
   if(ACValue!=0){
@@ -129,7 +151,7 @@ io.on("connection", (socket) => {
 
 mongoose
   .connect(
-    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/merntutorial?retryWrites=true&w=majority`
+    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/AIEMSLAB?retryWrites=true&w=majority`
   )
   .then(() => {
     console.log('Database Server Running')
