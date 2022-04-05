@@ -5,8 +5,9 @@ const EntryModel = require('./models/location3data')
 const mqtt = require("mqtt");
 require('dotenv').config();
 
-let valueRecieved = false;
-let ACValue = 0;
+var valueRecieved = false;
+var ACValue = 0;
+var resetValue=1;
 
 
 const io= require('socket.io')(server,{
@@ -70,13 +71,28 @@ client.on('message', function(topic, msg){
   //Send Data to ac
   if(ACValue!=0){
     if(client.connected){
-      client.publish('AIEMSL1/ACD', ACValue.toString(),opts=options);
-      console.log('Ac Value sent');
+      client.publish('AIEMSL1/EDL_0002I', JSON.stringify({ Delay: m.value.toString(),Reset:0 }),opts=options);
+      console.log('Delay Value sent again');
+      ACValue = 0;
+        
       
     }else{
       console.log('Ac Value not sent');
     }
     ACValue=0
+  }
+
+  //Send reset value
+  if(resetValue!=0){
+    if(client.connected){
+      client.publish('AIEMSL1/EDL_0002I', JSON.stringify({ Reset:1 }),opts=options);
+      console.log('Wifi Reset sent again');
+      resetValue = 0;
+      
+    }else{
+      
+    }
+    resetValue=0
   }
   
   // emit to sockets.io
@@ -127,7 +143,7 @@ setInterval(()=>{
   }
   valueRecieved=false;
  
-  }, 5000);
+  }, 55000);
 
   
   
@@ -137,15 +153,27 @@ io.on("connection", (socket) => {
     io.emit('cpu',{ temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
   }
   
-  socket.on("AC",(m)=>{
+  socket.on("interval",(m)=>{
     if(client.connected){
-        client.publish('AIEMSL1/ACD', m.value.toString(),opts=options);
-        console.log('Ac Value sent');
+        client.publish('AIEMSL1/EDL_0002I', JSON.stringify({ Delay: m.value.toString(),Reset:0 }),opts=options);
+        console.log('Delay Value sent');
         ACValue = 0;
         
       }else{
         ACValue = m.value;
       }
+})
+socket.on("wifiReset",(args)=>{
+  
+  if(client.connected){
+      client.publish('AIEMSL1/EDL_0002I', JSON.stringify({ Reset:1 }),opts=options);
+      console.log('Wifi Reset sent');
+      resetValue = 0;
+      
+    }else{
+      resetValue=1;
+      console.log('Wifi Reset Not Sent');
+    }
 })
 });
 
