@@ -45,6 +45,8 @@ client.on('message', function(topic, msg){
     lumS = obj.Lu;
 
     valueRecieved = true;
+    io.emit('cpu',{ temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
+  
   }
   if(topic.toString()==="AIEMSL1/EDL_0002"){
     const obj = JSON.parse(msg.toString());
@@ -85,7 +87,7 @@ client.on('message', function(topic, msg){
   //Send reset value
   if(resetValue!=0){
     if(client.connected){
-      client.publish('AIEMSL1/EDL_0002I', JSON.stringify({ Reset:1 }),opts=options);
+      client.publish('AIEMSL1/EDL_0001I', JSON.stringify({ Reset:1 }),opts=options);
       console.log('Wifi Reset sent again');
       resetValue = 0;
       
@@ -96,7 +98,6 @@ client.on('message', function(topic, msg){
   }
   
   // emit to sockets.io
-  io.emit('cpu',{ temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
   
   if(valueRecieved){
     
@@ -155,7 +156,7 @@ io.on("connection", (socket) => {
   
   socket.on("interval",(m)=>{
     if(client.connected){
-        client.publish('AIEMSL1/EDL_0002I', JSON.stringify({ Delay: m.value.toString(),Reset:0 }),opts=options);
+        client.publish('AIEMSL1/EDL_0001I', JSON.stringify({ Delay: m.value.toString(),Reset:0 }),opts=options);
         console.log('Delay Value sent');
         ACValue = 0;
         
@@ -166,7 +167,7 @@ io.on("connection", (socket) => {
 socket.on("wifiReset",(args)=>{
   
   if(client.connected){
-      client.publish('AIEMSL1/EDL_0002I', JSON.stringify({ Reset:1 }),opts=options);
+      client.publish('AIEMSL1/EDL_0001I', JSON.stringify({ Reset:1 }),opts=options);
       console.log('Wifi Reset sent');
       resetValue = 0;
       
