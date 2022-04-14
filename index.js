@@ -7,7 +7,7 @@ require('dotenv').config();
 
 var valueRecieved = false;
 var ACValue = 0;
-var resetValue=1;
+var resetValue=0;
 
 
 const io= require('socket.io')(server,{
