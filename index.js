@@ -73,7 +73,7 @@ client.on('message', function(topic, msg){
   //Send Data to ac
   if(ACValue!=0){
     if(client.connected){
-      client.publish('AIEMSL1/EDL_0002I', JSON.stringify({ Delay: m.value.toString(),Reset:0 }),opts=options);
+      client.publish('AIEMSL1/EDL_0001I', JSON.stringify({ Delay: ACValue.toString(),Reset:0 }),opts=options);
       console.log('Delay Value sent again');
       ACValue = 0;
         
