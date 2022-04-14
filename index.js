@@ -144,7 +144,7 @@ setInterval(()=>{
   }
   valueRecieved=false;
  
-  }, 55000);
+  }, 950000);
 
   
   
