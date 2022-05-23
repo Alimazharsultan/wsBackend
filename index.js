@@ -1,6 +1,8 @@
 const server = require('http').createServer();
 const mongoose = require('mongoose')
 const EntryModel = require('./models/location3data')
+const cors = require('cors')
+app.use(cors())
 //For Mqtt
 const mqtt = require("mqtt");
 require('dotenv').config();
@@ -28,9 +30,10 @@ var options={
       clientId: "NodeJSclient",
       hostname: "broker.hivemq.com",
     };
+
 var client = mqtt.connect(options);
 client.subscribe("AIEMSL1/EDL_0001");
-client.subscribe("AIEMSL1/EDL_0002");
+client.subscribe("AIEMSL1/EDL_0003");
 // console.log("connected  "+client.connected);
 io.on("AC", (message)=>{
     console.log('recieved:')
@@ -48,7 +51,7 @@ client.on('message', function(topic, msg){
     io.emit('cpu',{ temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
   
   }
-  if(topic.toString()==="AIEMSL1/EDL_0002"){
+  if(topic.toString()==="AIEMSL1/EDL_0003"){
     const obj = JSON.parse(msg.toString());
     io.emit('EDL_0002',{ temp: obj.Tem, humidity: obj.Hum, pressure: obj.Pres, lum: obj.Lu });
     
@@ -63,7 +66,7 @@ client.on('message', function(topic, msg){
       pressure_status: "Coming Soon",
     });
     return event.save().then((r)=>{
-      console.log('EDL_0002 saved to database');
+      console.log('EDL_0003 saved to database');
     }    
     ).catch(err=>{
       console.log('Error saving to database');
@@ -184,7 +187,7 @@ mongoose
   )
   .then(() => {
     console.log('Database Server Running')
-       server.listen(process.env.PORT|| 4002, () => {
+       server.listen(process.env.PORT|| 4000, () => {
       console.log("Sockets Server Running");
     });
     
