@@ -1,8 +1,8 @@
 const server = require('http').createServer();
 const mongoose = require('mongoose')
 const EntryModel = require('./models/location3data')
-const cors = require('cors')
-app.use(cors())
+// const cors = require('cors')
+// app.use(cors())
 //For Mqtt
 const mqtt = require("mqtt");
 require('dotenv').config();
