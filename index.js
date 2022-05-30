@@ -76,7 +76,7 @@ client.on('message', function(topic, msg){
   //Send Data to ac
   if(ACValue!=0){
     if(client.connected){
-      client.publish('AIEMSL1/EDL_0001I', JSON.stringify({ Delay: ACValue.toString(),Reset:0 }),opts=options);
+      client.publish('AIEMSL1/EDL_0003I', JSON.stringify({ Delay: ACValue.toString(),Reset:0 }),opts=options);
       console.log('Delay Value sent again');
       ACValue = 0;
         
@@ -90,7 +90,7 @@ client.on('message', function(topic, msg){
   //Send reset value
   if(resetValue!=0){
     if(client.connected){
-      client.publish('AIEMSL1/EDL_0001I', JSON.stringify({ Reset:1 }),opts=options);
+      client.publish('AIEMSL1/EDL_0003I', JSON.stringify({ Reset:1 }),opts=options);
       console.log('Wifi Reset sent again');
       resetValue = 0;
       
@@ -159,7 +159,7 @@ io.on("connection", (socket) => {
   
   socket.on("interval",(m)=>{
     if(client.connected){
-        client.publish('AIEMSL1/EDL_0001I', JSON.stringify({ Delay: m.value.toString(),Reset:0 }),opts=options);
+        client.publish('AIEMSL1/EDL_0003I', JSON.stringify({ Delay: m.value.toString(),Reset:0 }),opts=options);
         console.log('Delay Value sent');
         ACValue = 0;
         
@@ -170,7 +170,7 @@ io.on("connection", (socket) => {
 socket.on("wifiReset",(args)=>{
   
   if(client.connected){
-      client.publish('AIEMSL1/EDL_0001I', JSON.stringify({ Reset:1 }),opts=options);
+      client.publish('AIEMSL1/EDL_0003I', JSON.stringify({ Reset:1 }),opts=options);
       console.log('Wifi Reset sent');
       resetValue = 0;
       
@@ -187,7 +187,7 @@ mongoose
   )
   .then(() => {
     console.log('Database Server Running')
-       server.listen(process.env.PORT|| 4000, () => {
+       server.listen(process.env.PORT|| 4002, () => {
       console.log("Sockets Server Running");
     });
     
