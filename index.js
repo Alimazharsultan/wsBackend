@@ -205,7 +205,7 @@ socket.on("wifiReset",(args)=>{
 
 mongoose
   .connect(
-    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/AIMS?retryWrites=true&w=majority`
+    ``
   )
   .then(() => {
     console.log('Database Server Running')
