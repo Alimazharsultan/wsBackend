@@ -36,5 +36,5 @@ const EntrySchema = new mongoose.Schema({
     },
     
 });
-const EntryModel = mongoose.model("testdata3", EntrySchema)   
+const EntryModel = mongoose.model("EDL0003", EntrySchema)   
 module.exports = EntryModel;

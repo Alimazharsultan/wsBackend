@@ -1,6 +1,8 @@
 const server = require('http').createServer();
 const mongoose = require('mongoose')
-const EntryModel = require('./models/location3data')
+const EntryModel1 = require('./models/edl0001')
+const EntryModel2 = require('./models/edl0002')
+const EntryModel3 = require('./models/edl0003')
 // const cors = require('cors')
 // app.use(cors())
 //For Mqtt
@@ -32,7 +34,7 @@ var options={
     };
 
 var client = mqtt.connect(options);
-client.subscribe("AIEMSL1/EDL_0001");
+client.subscribe("AIEMSL1/EDL_0002");
 client.subscribe("AIEMSL1/EDL_0003");
 // console.log("connected  "+client.connected);
 io.on("AC", (message)=>{
@@ -40,12 +42,30 @@ io.on("AC", (message)=>{
 })
 client.on('message', function(topic, msg){
   console.log(topic+" Message Recieved -> "+msg.toString());
-  if(topic.toString()==="AIEMSL1/EDL_0001"){
+  if(topic.toString()==="AIEMSL1/EDL_0002"){
     const obj = JSON.parse(msg.toString());
     tempS = obj.Tem;
     humidityS = obj.Hum;
     pressureS = obj.Pres;
     lumS = obj.Lu;
+
+    const event = new EntryModel2({
+      readingtime: new Date().toISOString(),
+      temperature: tempS,
+      humidity: humidityS,
+      pressure: pressureS,
+      altitude: lumS,
+      temperature_status: "Coming Soon",
+      humidity_status: "Coming Soon",
+      pressure_status: "Coming Soon",
+    });
+    return event.save().then((r)=>{
+      console.log('EDL_0003 saved to database');
+    }    
+    ).catch(err=>{
+      console.log('Error saving to database');
+    }); 
+    
 
     valueRecieved = true;
     io.emit('cpu',{ temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
@@ -55,7 +75,7 @@ client.on('message', function(topic, msg){
     const obj = JSON.parse(msg.toString());
     io.emit('EDL_0002',{ temp: obj.Tem, humidity: obj.Hum, pressure: obj.Pres, lum: obj.Lu });
     
-    const event = new EntryModel({
+    const event = new EntryModel3({
       readingtime: new Date().toISOString(),
       temperature: obj.Tem,
       humidity: obj.Hum,
@@ -72,6 +92,7 @@ client.on('message', function(topic, msg){
       console.log('Error saving to database');
             }); 
     }
+  
   
   //Send Data to ac
   if(ACValue!=0){
@@ -158,6 +179,7 @@ io.on("connection", (socket) => {
   }
   
   socket.on("interval",(m)=>{
+    console.log('interval recieved')
     if(client.connected){
         client.publish('AIEMSL1/EDL_0003I', JSON.stringify({ Delay: m.value.toString(),Reset:0 }),opts=options);
         console.log('Delay Value sent');
@@ -183,7 +205,7 @@ socket.on("wifiReset",(args)=>{
 
 mongoose
   .connect(
-    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/merntutorial?retryWrites=true&w=majority`
+    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/AIMS?retryWrites=true&w=majority`
   )
   .then(() => {
     console.log('Database Server Running')
